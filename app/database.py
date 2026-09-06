@@ -3,17 +3,14 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 
 from app.config import settings
 
-
-# ============================================================
-# DATABASE URL
-# ============================================================
-
 DATABASE_URL = settings.database_url
 
-
-# ============================================================
-# DATABASE ENGINE
-# ============================================================
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace(
+        "postgres://",
+        "postgresql://",
+        1,
+    )
 
 connect_args = {}
 
@@ -26,13 +23,8 @@ if DATABASE_URL.startswith("sqlite"):
 engine = create_engine(
     DATABASE_URL,
     connect_args=connect_args,
-    pool_pre_ping=True,
 )
 
-
-# ============================================================
-# DATABASE SESSION
-# ============================================================
 
 SessionLocal = sessionmaker(
     autocommit=False,
@@ -41,21 +33,14 @@ SessionLocal = sessionmaker(
 )
 
 
-# ============================================================
-# SQLALCHEMY BASE
-# ============================================================
-
 Base = declarative_base()
 
-
-# ============================================================
-# DATABASE DEPENDENCY
-# ============================================================
 
 def get_db():
     db = SessionLocal()
 
     try:
         yield db
+
     finally:
         db.close()
